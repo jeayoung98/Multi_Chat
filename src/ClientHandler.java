@@ -124,6 +124,7 @@ public class ClientHandler extends Thread {
             sendMessage("귓속말을 " + name + "님에게 전송했습니다.");
         } else {
             sendMessage(name + "님을 찾을 수 없습니다.");
+
         }
     }
 
