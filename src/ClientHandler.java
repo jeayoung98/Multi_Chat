@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 
 public class ClientHandler extends Thread {
@@ -9,6 +10,8 @@ public class ClientHandler extends Thread {
     private ChatServer server;
     private String clientsName;
     private Integer currentRoomId = null;
+
+    private ArrayList<String> blockWhisper = new ArrayList<>();
 
     public String getClientsName() {
         return clientsName;
@@ -32,7 +35,6 @@ public class ClientHandler extends Thread {
             clientsName = in.readLine(); // 클라이언트로부터 닉네임을 받음
             if (server.addClient(clientsName, this)) { // 닉네임을 서버에 추가하고 중복 검사
                 out.println("OK");
-                ChatServer chatServer = this.server;
                 server.broadcast("로비: " + clientsName + " 사용자가 연결되었습니다.");
                 out.println("명령어 모음 : /help");
                 handleClient(); // 닉네임이 유효하면 클라이언트 처리 시작
@@ -98,7 +100,7 @@ public class ClientHandler extends Thread {
                 if (currentRoomId != null) {
                     server.exitRoom(currentRoomId, this);
                     currentRoomId = null;
-                    out.println("채팅방을 나갔습니다. 로비로 이동합니다.");
+                    sendMessage("채팅방을 나갔습니다. 로비로 이동합니다.");
                 } else {
                     sendMessage("채팅방이 없습니다.");
                 }
@@ -109,7 +111,13 @@ public class ClientHandler extends Thread {
                 server.createRoom(this, password);
                 break;
             case "/help":
-                out.println("/r : 귓속말\n/join : 채팅방 입장\n/create : 채팅방 생성\n/exit : 채팅방 퇴장");
+                sendMessage("/r : 귓속말\n/block : 귓속말 차단\n/unblock : 귓속말 차단풀기\n/join : 채팅방 입장\n/create : 채팅방 생성\n/exit : 채팅방 퇴장");
+                break;
+            case "/block":
+                blockUser(parts);
+                break;
+            case "/unblock":
+                unblockUser(parts);
                 break;
             default:
                 sendMessage("알 수 없는 명령어: " + parts[0]);
@@ -120,13 +128,47 @@ public class ClientHandler extends Thread {
     private void whisper(String name, String message) {
         ClientHandler receiver = server.getClients().get(name);
         if (receiver != null) {
-            receiver.sendMessage(clientsName + "님의 귓속말: " + message);
-            sendMessage("귓속말을 " + name + "님에게 전송했습니다.");
+            if (!receiver.blockWhisper.contains(this.clientsName)) {
+                receiver.sendMessage(clientsName + "님의 귓속말: " + message);
+                sendMessage("귓속말을 " + name + "님에게 전송했습니다.");
+            } else {
+                sendMessage(name + "님이 " + clientsName + "님의 귓속말을 차단하셨습니다.");
+            }
         } else {
             sendMessage(name + "님을 찾을 수 없습니다.");
-
         }
     }
+
+
+    private void blockUser(String[] parts) {
+        if (parts.length < 2) {
+            sendMessage("차단할 사용자의 이름을 입력해주세요. '/block 사용자이름'");
+            return;
+        }
+        String userBlock = parts[1];
+        if (!blockWhisper.contains(userBlock)) {
+            blockWhisper.add(userBlock);
+            sendMessage(userBlock + "님의 귓속말을 차단하였습니다.");
+        } else {
+            sendMessage(userBlock + "님은 이미 차단된 상태입니다.");
+        }
+    }
+
+    private void unblockUser(String[] parts) {
+        if (parts.length < 2) {
+            sendMessage("차단 해제할 사용자의 이름을 입력해주세요. '/unblock 사용자이름'");
+            return;
+        }
+        String userUnblock = parts[1];
+        if (blockWhisper.contains(userUnblock)) {
+            blockWhisper.remove(userUnblock);
+            sendMessage(userUnblock + "님의 귓속말 차단을 해제하였습니다.");
+        } else {
+            sendMessage(userUnblock + "님은 차단되지 않았습니다.");
+        }
+    }
+
+
 
     public void sendMessage(String message) {
         out.println(message);
