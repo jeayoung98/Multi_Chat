@@ -39,14 +39,7 @@ public class ChatRoom {
     }
 
     public void broadcast(String message) {
-        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(chatLog, true)))) {
-            out.println(message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (ClientHandler participant : participants) {
-            participant.sendMessage(message);
-        }
+        participants.forEach(participant -> participant.sendMessage(message));
         appendLog(message);
     }
 
