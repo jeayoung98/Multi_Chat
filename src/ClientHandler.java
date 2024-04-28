@@ -131,8 +131,11 @@ public class ClientHandler extends Thread {
             case "/unblock":
                 unblockUser(parts);
                 break;
-            case "/roomlist":
+            case "/room":
                 sendMessage(server.listRooms());
+                break;
+            case "/user":
+                sendMessage(server.listUsers());
                 break;
             default:
                 sendMessage("알 수 없는 명령어: " + parts[0]);

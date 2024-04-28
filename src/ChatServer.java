@@ -103,6 +103,17 @@ public class ChatServer {
         }
     }
 
+    public String listUsers() {
+        StringBuilder sb = new StringBuilder("현재 유저 목록\n");
+        clients.forEach((clientsName, handler) -> {
+            Integer currentRoomId = handler.getCurrentRoomId();
+            sb.append("유저 이름 : ").append(clientsName)
+                    .append(", 현재 위치 : ").append(currentRoomId == null ? "로비" : currentRoomId + "번방")
+                    .append("\n");
+        });
+        return sb.toString();
+    }
+
 
 
     public void broadcast(String message) {
