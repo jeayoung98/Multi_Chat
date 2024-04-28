@@ -136,8 +136,8 @@ public class ClientHandler extends Thread {
     private void whisper(String name, String message) {
         ClientHandler receiver = server.getClients().get(name);
         if (receiver != null) {
-            Boolean isBlocked = receiver.blockWhisper.get(clientsName);
-            if (isBlocked == null || !isBlocked) {
+            boolean isBlocked = receiver.blockWhisper.containsKey(clientsName);
+            if (!isBlocked) {
                 receiver.sendMessage(clientsName + "님의 귓속말: " + message);
                 sendMessage("귓속말을 " + name + "님에게 전송했습니다.");
             } else {
@@ -154,6 +154,7 @@ public class ClientHandler extends Thread {
             sendMessage("차단할 사용자의 이름을 입력해주세요. '/block 사용자이름'");
             return;
         }
+
         String userBlock = parts[1];
         blockWhisper.put(userBlock, false);
         sendMessage(userBlock + "님의 귓속말을 차단하였습니다.");
