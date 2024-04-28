@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ClientHandler extends Thread {
@@ -11,12 +13,15 @@ public class ClientHandler extends Thread {
     private String clientsName;
     private Integer currentRoomId = null;
 
-    private ArrayList<String> blockWhisper = new ArrayList<>();
+    private Map<String, Boolean> blockWhisper = new HashMap<>();
 
     public String getClientsName() {
         return clientsName;
     }
 
+    public Integer getCurrentRoomId() {
+        return currentRoomId;
+    }
 
     public ClientHandler(Socket socket, ChatServer server) {
         this.socket = socket;
@@ -111,10 +116,13 @@ public class ClientHandler extends Thread {
                 server.createRoom(this, password);
                 break;
             case "/help":
-                sendMessage("/r : 귓속말\n/block : 귓속말 차단\n/unblock : 귓속말 차단풀기\n/join : 채팅방 입장\n/create : 채팅방 생성\n/exit : 채팅방 퇴장");
+                sendMessage("/r : 귓속말\n/block : 귓속말 차단\n/blockAll : 모든 채팅 차단\n/unblock : 차단풀기\n/join : 채팅방 입장\n/create : 채팅방 생성\n/exit : 채팅방 퇴장");
                 break;
             case "/block":
                 blockUser(parts);
+                break;
+            case "/blockAll":
+                blockUserAll(parts);
                 break;
             case "/unblock":
                 unblockUser(parts);
@@ -128,7 +136,8 @@ public class ClientHandler extends Thread {
     private void whisper(String name, String message) {
         ClientHandler receiver = server.getClients().get(name);
         if (receiver != null) {
-            if (!receiver.blockWhisper.contains(this.clientsName)) {
+            Boolean isBlocked = receiver.blockWhisper.get(clientsName);
+            if (isBlocked == null || !isBlocked) {
                 receiver.sendMessage(clientsName + "님의 귓속말: " + message);
                 sendMessage("귓속말을 " + name + "님에게 전송했습니다.");
             } else {
@@ -146,12 +155,18 @@ public class ClientHandler extends Thread {
             return;
         }
         String userBlock = parts[1];
-        if (!blockWhisper.contains(userBlock)) {
-            blockWhisper.add(userBlock);
-            sendMessage(userBlock + "님의 귓속말을 차단하였습니다.");
-        } else {
-            sendMessage(userBlock + "님은 이미 차단된 상태입니다.");
+        blockWhisper.put(userBlock, false);
+        sendMessage(userBlock + "님의 귓속말을 차단하였습니다.");
+    }
+
+    private void blockUserAll(String[] parts) {
+        if (parts.length < 2) {
+            sendMessage("차단할 사용자의 이름을 입력해주세요. '/blockAll 사용자이름'");
+            return;
         }
+        String userBlock = parts[1];
+        blockWhisper.put(userBlock, true);
+        sendMessage(userBlock + "님의 채팅을 모두 차단하였습니다.");
     }
 
     private void unblockUser(String[] parts) {
@@ -160,7 +175,7 @@ public class ClientHandler extends Thread {
             return;
         }
         String userUnblock = parts[1];
-        if (blockWhisper.contains(userUnblock)) {
+        if (blockWhisper.containsKey(userUnblock)) {
             blockWhisper.remove(userUnblock);
             sendMessage(userUnblock + "님의 귓속말 차단을 해제하였습니다.");
         } else {
