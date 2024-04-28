@@ -94,7 +94,16 @@ public class ChatServer {
     }
 
     public void broadcast(String message) {
-        clients.values().forEach(client -> client.sendMessage(message));
+        clients.values().forEach(receiver -> {
+            // 발신자 정보가 없으므로, 단순히 로비 메시지가 아니라면 발신자 이름을 메시지에서 추출해야 합니다.
+            // 여기서는 예시로 "사용자명: 메시지" 형식으로 가정하고, 사용자명을 추출합니다.
+            String senderName = message.split(":")[0];
+
+            // 수신자(receiver)의 차단 목록을 확인하여 발신자(senderName)를 차단했는지 검사합니다.
+            if (!receiver.getBlockWhisper().getOrDefault(senderName, false)) {
+                receiver.sendMessage(message);
+            }
+        });
     }
 
     public static void main(String[] args) throws IOException {

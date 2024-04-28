@@ -15,6 +15,10 @@ public class ClientHandler extends Thread {
 
     private Map<String, Boolean> blockWhisper = new HashMap<>();
 
+    public Map<String, Boolean> getBlockWhisper() {
+        return blockWhisper;
+    }
+
     public String getClientsName() {
         return clientsName;
     }
@@ -64,9 +68,9 @@ public class ClientHandler extends Thread {
                 } else {
                     // 로비 또는 채팅방에서 메시지 처리
                     if (currentRoomId == null) {
-                        server.broadcast(clientsName + ": " + line);
+                        server.broadcast(clientsName + ": " + line); // 사용자이름 : 메세지
                     } else {
-                        server.getChatRooms().get(currentRoomId).broadcast(clientsName + ": " + line);
+                        server.getChatRooms().get(currentRoomId).broadcast(clientsName + ": " + line); // 사용자이름 : 메세지
                     }
                 }
             }
@@ -178,7 +182,7 @@ public class ClientHandler extends Thread {
         String userUnblock = parts[1];
         if (blockWhisper.containsKey(userUnblock)) {
             blockWhisper.remove(userUnblock);
-            sendMessage(userUnblock + "님의 귓속말 차단을 해제하였습니다.");
+            sendMessage(userUnblock + "님 차단을 해제하였습니다.");
         } else {
             sendMessage(userUnblock + "님은 차단되지 않았습니다.");
         }
