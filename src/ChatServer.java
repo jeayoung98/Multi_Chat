@@ -61,8 +61,10 @@ public class ChatServer {
     }
 
 
-
     public synchronized void joinRoom(int roomId, ClientHandler handler, String password) {
+        if (handler.getCurrentRoomId() != null) {
+            exitRoom(handler.getCurrentRoomId(), handler);  // 기존 방을 떠나는 로직 추가
+        }
         ChatRoom room = chatRooms.get(roomId);
         if (room != null) {
             if (room.addParticipant(handler, password)) {
