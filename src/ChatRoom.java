@@ -39,7 +39,12 @@ public class ChatRoom {
     }
 
     public void broadcast(String message) {
-        participants.forEach(participant -> participant.sendMessage(message));
+        participants.forEach(participant ->{
+                    String senderName = message.split(":")[0];
+                    if (!participant.getBlockWhisper().getOrDefault(senderName, false)) {
+                        participant.sendMessage(message);
+                    }
+                });
         appendLog(message);
     }
 
