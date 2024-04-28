@@ -93,6 +93,18 @@ public class ChatServer {
         }
     }
 
+    public String listRooms() {
+        if (chatRooms.isEmpty()) {
+            return "현재 활성화된 채팅방이 없습니다.";
+        } else {
+            StringBuilder sb = new StringBuilder("활성화된 채팅방 목록:\n");
+            chatRooms.forEach((id, room) -> sb.append("방 번호 : ").append(id).append(" || 비밀번호 여부 : " + (room.hasPassword()?"O":"X")).append("\n"));
+            return sb.toString();
+        }
+    }
+
+
+
     public void broadcast(String message) {
         clients.values().forEach(receiver -> {
             // 발신자 정보가 없으므로, 단순히 로비 메시지가 아니라면 발신자 이름을 메시지에서 추출해야 합니다.

@@ -83,7 +83,7 @@ public class ClientHandler extends Thread {
     }
 
     private void command(String command) {
-        String[] parts = command.split(" ", 3);
+        String[] parts = command.trim().split(" ", 3);
         switch (parts[0]) {
             case "/r":
                 if (parts.length > 2) {
@@ -130,6 +130,9 @@ public class ClientHandler extends Thread {
                 break;
             case "/unblock":
                 unblockUser(parts);
+                break;
+            case "/roomlist":
+                sendMessage(server.listRooms());
                 break;
             default:
                 sendMessage("알 수 없는 명령어: " + parts[0]);

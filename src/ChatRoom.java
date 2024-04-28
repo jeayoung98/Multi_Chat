@@ -38,6 +38,10 @@ public class ChatRoom {
         }
     }
 
+    public boolean hasPassword() {
+        return password != null && !password.isEmpty();
+    }
+
     public void broadcast(String message) {
         participants.forEach(participant ->{
                     String senderName = message.split(":")[0];
