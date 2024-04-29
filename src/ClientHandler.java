@@ -59,6 +59,8 @@ public class ClientHandler extends Thread {
             closeConnection(); // 모든 처리 후 연결 종료
         }
     }
+
+    // 메세지 처리
     private void handleClient() {
         try {
             String line;
@@ -82,6 +84,7 @@ public class ClientHandler extends Thread {
         }
     }
 
+    // 명령어
     private void command(String command) {
         String[] parts = command.trim().split(" ", 3);
         switch (parts[0]) {
@@ -143,10 +146,11 @@ public class ClientHandler extends Thread {
         }
     }
 
+    // 귓속말 보내기
     private void whisper(String name, String message) {
         ClientHandler receiver = server.getClients().get(name);
         if (receiver != null) {
-            boolean isBlocked = receiver.blockWhisper.containsKey(clientsName);
+            boolean isBlocked = receiver.blockWhisper.containsKey(clientsName); // 차단인지 판단
             if (!isBlocked) {
                 receiver.sendMessage(clientsName + "님의 귓속말: " + message);
                 sendMessage("귓속말을 " + name + "님에게 전송했습니다.");
@@ -159,6 +163,7 @@ public class ClientHandler extends Thread {
     }
 
 
+    // 귓속말 차단
     private void blockUser(String[] parts) {
         if (parts.length < 2) {
             sendMessage("차단할 사용자의 이름을 입력해주세요. '/block 사용자이름'");
@@ -170,6 +175,7 @@ public class ClientHandler extends Thread {
         sendMessage(userBlock + "님의 귓속말을 차단하였습니다.");
     }
 
+    // 채팅 차단
     private void blockUserAll(String[] parts) {
         if (parts.length < 2) {
             sendMessage("차단할 사용자의 이름을 입력해주세요. '/blockAll 사용자이름'");
@@ -180,6 +186,7 @@ public class ClientHandler extends Thread {
         sendMessage(userBlock + "님의 채팅을 모두 차단하였습니다.");
     }
 
+    // 차단 풀기
     private void unblockUser(String[] parts) {
         if (parts.length < 2) {
             sendMessage("차단 해제할 사용자의 이름을 입력해주세요. '/unblock 사용자이름'");
@@ -196,6 +203,7 @@ public class ClientHandler extends Thread {
 
 
 
+    // 메세지
     public void sendMessage(String message) {
         out.println(message);
     }

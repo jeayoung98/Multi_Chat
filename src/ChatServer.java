@@ -35,6 +35,7 @@ public class ChatServer {
         }
     }
 
+    // 입장
     public synchronized boolean addClient(String nickname, ClientHandler handler) {
         if (!clients.containsKey(nickname)) {
             clients.put(nickname, handler);
@@ -46,12 +47,14 @@ public class ChatServer {
         }
     }
 
+    // 퇴장
     public synchronized void removeClient(String nickname) {
         clients.remove(nickname);
         broadcast("로비: " + nickname + " 사용자가 연결을 끊었습니다.");
         System.out.println(nickname + " 사용자가 연결을 끊었습니다.");
     }
 
+    // 방 생성
     public synchronized void createRoom(ClientHandler handler, String password) {
         ChatRoom newRoom = new ChatRoom(++roomCounter, password.isEmpty() ? null : password);
         chatRooms.put(roomCounter, newRoom);
@@ -60,7 +63,7 @@ public class ChatServer {
                 " /join " + roomCounter + (password.isEmpty() ? "" : " [password]") + "로 입장하세요.");
     }
 
-
+    // 방 입장
     public synchronized void joinRoom(int roomId, ClientHandler handler, String password) {
         if (handler.getCurrentRoomId() != null) {
             exitRoom(handler.getCurrentRoomId(), handler);  // 기존 방을 떠나는 로직 추가
@@ -78,6 +81,7 @@ public class ChatServer {
         }
     }
 
+    // 방 퇴장
     public synchronized void exitRoom(int roomId, ClientHandler handler) {
         ChatRoom room = chatRooms.get(roomId);
         if (room != null) {
@@ -93,6 +97,7 @@ public class ChatServer {
         }
     }
 
+    // 방 목록
     public String listRooms() {
         if (chatRooms.isEmpty()) {
             return "현재 활성화된 채팅방이 없습니다.";
@@ -103,6 +108,7 @@ public class ChatServer {
         }
     }
 
+    // 유저 목록
     public String listUsers() {
         StringBuilder sb = new StringBuilder("현재 유저 목록\n");
         clients.forEach((clientsName, handler) -> {
@@ -116,6 +122,7 @@ public class ChatServer {
 
 
 
+    // 차단 확인 후 메시지
     public void broadcast(String message) {
         clients.values().forEach(receiver -> {
             // 발신자 정보가 없으므로, 단순히 로비 메시지가 아니라면 발신자 이름을 메시지에서 추출해야 합니다.
